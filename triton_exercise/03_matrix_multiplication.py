@@ -118,15 +118,15 @@ def matmul_kernel(
         a_ptrs += BLOCK_SIZE_K * stride_ak
         b_ptrs += BLOCK_SIZE_K * stride_bk
 
-        if ACTIVATION == 'leaky_relu':
-            accumulator = leaky_relu(accumulator)
-        c = accumulator.to(tl.float16)
+    if ACTIVATION == 'leaky_relu':
+        accumulator = leaky_relu(accumulator)
+    c = accumulator.to(tl.float16)
 
-        offs_cm = pid_m * BLOCK_SIZE_M + tl.arange(0, BLOCK_SIZE_M)
-        offs_cn = pid_n * BLOCK_SIZE_N + tl.arange(0, BLOCK_SIZE_N)
-        c_ptrs = c_ptr + stride_cm * offs_cm[:, None] + stride_cn * offs_cn[None, :]
-        c_mask = (offs_cm[:, None] < M) & (offs_cn[None, :] < N)
-        tl.store(c_ptrs, c, mask=c_mask)
+    offs_cm = pid_m * BLOCK_SIZE_M + tl.arange(0, BLOCK_SIZE_M)
+    offs_cn = pid_n * BLOCK_SIZE_N + tl.arange(0, BLOCK_SIZE_N)
+    c_ptrs = c_ptr + stride_cm * offs_cm[:, None] + stride_cn * offs_cn[None, :]
+    c_mask = (offs_cm[:, None] < M) & (offs_cn[None, :] < N)
+    tl.store(c_ptrs, c, mask=c_mask)
 
 
 
